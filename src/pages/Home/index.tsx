@@ -48,27 +48,34 @@ function createNewCycle(data:NewCycleFormData){
   }
   setCycles(state => [...state, newCycle])
   setActiveCycleId(newCycle.id)
+  setSecsPassed(0)
   reset()
 }
 const activeCycle = cycles.find((cycle)=> cycle.id === activeCycleId)
 
 useEffect(()=>{
+  let interval:number;
   if(activeCycle){
-    setInterval(()=>{
+    interval = setInterval(()=>{
       setSecsPassed(differenceInSeconds(new Date(),activeCycle.startDate))
     },1000)
   }
+  return ()=>{ clearInterval(interval)}
 },[activeCycle])
 
 
 const totalSecs = activeCycle ? activeCycle.minutesAmount * 60 : 0
 const currSecs = activeCycle ? totalSecs - secsPassed : 0
 
-const minsAmount = Math.floor(totalSecs / 60)
+const minsAmount = Math.floor(currSecs / 60)
 const secsAmount = currSecs %60 
 
 const mins = String(minsAmount).padStart(2,'0')
 const secs = String(secsAmount).padStart(2,'0')
+
+useEffect(()=>{
+  if(activeCycle) document.title = `${mins}:${secs}`
+},[mins,secs,activeCycle])
 
   return(
     <HomeContainer>
